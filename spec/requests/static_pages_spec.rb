@@ -12,7 +12,7 @@ describe "StaticPages" do
 
     it "should have help page" do 
       visit '/static_pages/help'
-      page.should have_content('Help')
+      page.should have_selector('h1',:text=>'Help')
     end
 
     it 'should have the right title' do
