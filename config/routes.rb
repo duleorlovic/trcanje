@@ -1,7 +1,9 @@
 Trcanje::Application.routes.draw do
-  get "users/new"
-  match '/signin',to:"users#new"
-  match '/signup',to:"users#new"
+
+  resources :user
+#  get "users/new"
+  match '/signin',to:"user#new"
+  match '/signup',to:"user#new"
   match '/help',to: "static_pages#help"
   match '/contact',to: 'static_pages#contact'
   match '/about',to:'static_pages#about'
