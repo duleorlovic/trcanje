@@ -1,8 +1,10 @@
 Trcanje::Application.routes.draw do
 
   resources :user
-#  get "users/new"
-  match '/signin',to:"user#new"
+  resources :sessions, only: [:new,:create,:destroy]
+
+  match '/signin',to:"sessions#new"
+  match '/signout',to:"sessions#destroy"
   match '/signup',to:"user#new"
   match '/help',to: "static_pages#help"
   match '/contact',to: 'static_pages#contact'

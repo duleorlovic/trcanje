@@ -6,6 +6,7 @@ class UserController < ApplicationController
   def create
     @user = Users.new(params[:users])
     if @user.save
+      sign_in @user
       flash[:success] = "Welcome #{@user.name}"
       redirect_to @user
     else
@@ -21,5 +22,8 @@ class UserController < ApplicationController
   end
 
   def edit
+    @user = Users.find(params[:id])
+  end
+  def update
   end
 end

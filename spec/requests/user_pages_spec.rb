@@ -3,6 +3,24 @@ require 'spec_helper'
 describe "UserPages" do
   subject { page }
 
+  describe "edit" do
+    let(:user) { FactoryGirl.create(:users)}
+    before { visit edit_user_path(user) }
+
+    describe "page" do
+      it { should have_selector('h1',text:"Edit") }
+      it { should have_link('change',href:'http://gravatar.com/emails') }
+    end
+    describe "with invalid inf" do
+      let(:error) { 'error'}
+      before { click_button "Update" }
+
+      it { should have_content(error) }
+    end
+
+  end
+
+
   describe "signup page" do
       before { visit signup_path }
   
