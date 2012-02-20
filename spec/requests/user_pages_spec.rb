@@ -64,4 +64,36 @@ describe "UserPages" do
     it {should have_selector('h1', text:users.name) }
    # it {should have_selector('title', text:users.name) }
   end
+  describe "index" do
+    let (:user) { FactoryGirl.create(:users)}
+    before do
+      sign_in user
+      visit user_path
+    end
+    after { Users.delete_all }
+    it {should have_selector('title',text:'All users')}
+    describe "pagination" do
+       before(:all) { 30.times {FactoryGirl.create(:users) }}
+       after(:all) { Users.delete_all }
+       it {should have_link('Next')}
+       it {should have_link('2') }
+       it { should have_link('delete',href:user_path(Users.first))}
+       it "should list each user" do
+         Users.all[0..2].each do |user|
+           page.should have_selector('li',text:user.name)
+         end
+       end
+       describe "as an admin user"
+          let(:admin) { FactoryGirl.create(:admin)}
+          before do
+            sign_in admin
+            visit user_path
+          end
+          it { should have_link('delete',href:user_path(Users.first)) }
+          it "should be able to delete another user" do 
+            expect { click_link('delete') }.to change(Users,:count).by(-1)
+          end
+          it {should_not have_link('delete',href:user_path(admin))}
+    end
+  end
 end

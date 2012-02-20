@@ -8,14 +8,54 @@ describe "AuthenticationPages" do
       let(:user) { Factory(:users) }
 
       describe "in the users controler" do
-        
+        describe "visiting user index" do
+          before { visit user_path }
+          it { should have_selector('title',text:"Sign in") }
+        end
+
         describe "visiting the edit page" do
           before { visit edit_user_path(user) }
-         # it { should have_selector('title',text:'Sign in') }
+          it { should have_selector('title',text:'Sign in') }
+          describe "after signin" do
+            before do
+              fill_in "Email", with: user.email
+              fill_in "Password",with:user.password
+              click_button "Sign in"
+            end
+            it {should have_selector('title',text:"Edit")}
+          end
         end
         describe "submit the update action" do
           before { put user_path(user) }
           specify { response.should redirect_to(signin_path) }
+        end
+      end
+    end
+    describe "for signed users" do
+      let(:user) { FactoryGirl.create(:users) }
+      let(:wrong_user) { FactoryGirl.create(:users,email:"wrog@example.com") }
+      before { sign_in user  }
+      
+      describe "visit users#edit page" do
+        before { visit edit_user_path(wrong_user) }
+        it { should have_selector('title',text:'Home')}
+      end
+      
+      describe "submiting put request to users#update action" do
+        before { put user_path(wrong_user) }
+        it { request.should redirect_to(root_path) }
+      end
+
+      describe "as no-admin user" do
+        let(:user) { FactoryGirl.create(:users) }
+        let(:non_admin) { FactoryGirl.create(:users) }
+
+        before { sign_in non_admin }
+
+        describe "submitting a DELETE request to the Users#destroy action" do
+                before { delete "/user/3" }
+#                specify { response.should redirect_to(root_path) }        
+                it { should have_link("home")}
         end
       end
     end
@@ -37,13 +77,11 @@ describe "AuthenticationPages" do
         click_button "Sign in"
       end
 
+      it { should have_link('Users',href:user_path) }
       it { should have_link('Profile',href:user_path(user)) }
       it { should have_link('Settings',href:edit_user_path(user)) }
       it { should have_link('Sign out', href:signout_path) }
       it { should_not have_link('Sign in', href:signin_path) }
     end
   end
-
- 
-
 end

@@ -1,5 +1,8 @@
 class UserController < ApplicationController
-  before_filter :signed_in_user, only: [:edit,:update]
+  before_filter :signed_in_user, only: [:index,:edit,:update]
+  before_filter :correct_user,only:[:edit,:update]
+  before_filter :admin_user,only: :destroy
+
   def new
      @user = Users.new(params[:users])
   end
@@ -19,14 +22,13 @@ class UserController < ApplicationController
     @user = Users.find(params[:id])
   end
 
-  #def index
-  #end
+  def index
+    @user = Users.paginate(page:params[:page])
+  end
 
   def edit
-    @user = Users.find(params[:id])
   end
   def update
-    @user = Users.find(params[:id])
     if @user.update_attributes(params[:users])
       flash[:success]= "Profile updated"
       sign_in @user
@@ -35,8 +37,23 @@ class UserController < ApplicationController
       render 'edit'
     end
   end
+  def destroy
+    Users.find(params[:id]).destroy
+    flash[:success]="User destroyed"
+    redirect_to "/user"
+  end
   private
     def signed_in_user
-      redirect_to signin_path, notice:"Please sign in" unless signed_in?
+      unless signed_in?
+        store_location
+        redirect_to signin_path, notice:"Please sign in"
+      end
+    end
+    def correct_user
+      @user = Users.find(params[:id])
+      redirect_to root_path, notice:"Incorect user" unless current_user?(@user)
+    end
+    def admin_user
+      redirect_to root_path, "only admin can do that" unless current_user.admin?
     end
 end
