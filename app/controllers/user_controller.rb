@@ -2,6 +2,7 @@ class UserController < ApplicationController
   before_filter :signed_in_user, only: [:index,:edit,:update]
   before_filter :correct_user,only:[:edit,:update]
   before_filter :admin_user,only: :destroy
+  before_filter :only_unsigned, only:[:new,:create]
 
   def new
      @user = Users.new(params[:users])
@@ -54,6 +55,9 @@ class UserController < ApplicationController
       redirect_to root_path, notice:"Incorect user" unless current_user?(@user)
     end
     def admin_user
-      redirect_to root_path, "only admin can do that" unless current_user.admin?
+      redirect_to root_path, notice:"only admin can do that" unless current_user.admin?
+    end
+    def only_unsigned
+      redirect_to root_path, notice:"only unsigned user can crate new" if signed_in? 
     end
 end

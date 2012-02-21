@@ -17,11 +17,7 @@ describe "AuthenticationPages" do
           before { visit edit_user_path(user) }
           it { should have_selector('title',text:'Sign in') }
           describe "after signin" do
-            before do
-              fill_in "Email", with: user.email
-              fill_in "Password",with:user.password
-              click_button "Sign in"
-            end
+            before { sign_in user}
             it {should have_selector('title',text:"Edit")}
           end
         end
@@ -46,16 +42,23 @@ describe "AuthenticationPages" do
         it { request.should redirect_to(root_path) }
       end
 
+      describe "visit user/new page " do
+        before { visit new_user_path }
+        it { should have_selector('title',text:'Home') }
+      end
+      describe "submit user/new " do
+        before { post user_path }
+        it { response.should redirect_to(root_path)}
+      end
+
       describe "as no-admin user" do
-        let(:user) { FactoryGirl.create(:users) }
         let(:non_admin) { FactoryGirl.create(:users) }
 
         before { sign_in non_admin }
 
         describe "submitting a DELETE request to the Users#destroy action" do
                 before { delete "/user/3" }
-#                specify { response.should redirect_to(root_path) }        
-                it { should have_link("home")}
+                specify { response.should redirect_to(root_path) }        
         end
       end
     end
@@ -69,13 +72,13 @@ describe "AuthenticationPages" do
       it {should have_selector('div.flash.error',test:"Invalid") }
     end
 
+    it { should_not have_link('Users') }
+    it { should_not have_link('Profile') }
+    it { should_not have_link('Settings') }
     describe "with valid info" do
       let(:user) {FactoryGirl.create(:users) }
-      before do
-        fill_in "Email", with:user.email
-        fill_in "Password", with:user.password
-        click_button "Sign in"
-      end
+      
+      before {sign_in user }
 
       it { should have_link('Users',href:user_path) }
       it { should have_link('Profile',href:user_path(user)) }
