@@ -57,20 +57,30 @@ describe "UserPages" do
         end
       end
     end
-  describe "profile page" do
-    let(:users) { FactoryGirl.create(:users)}
-    before { visit user_path(users) }
 
-    it {should have_selector('h1', text:users.name) }
-   # it {should have_selector('title', text:users.name) }
+  describe "Profile page" do
+    let(:user) { FactoryGirl.create(:users)}
+    let!(:m1) { user.microposts.create(content:"foo") }
+    let!(:m2) { user.microposts.create(content:"boo") }
+
+    before { visit user_path(user) }
+
+    it { should have_selector('h1', text:user.name) }
+
+    describe "microposts" do 
+      it { should have_content(m1.content) }
+      it { should have_content(m1.content) }
+      it { should have_content(user.microposts.count) }
+    end
   end
+  
   describe "index" do
     let (:user) { FactoryGirl.create(:users)}
     before do
       sign_in user
       visit user_path
     end
-    after { Users.delete_all }
+#    after { Users.delete_all }
     it {should have_selector('title',text:'All users')}
     describe "pagination" do
        before(:all) { 30.times {FactoryGirl.create(:users) }}

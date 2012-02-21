@@ -12,10 +12,38 @@ describe Users do
   it { should respond_to :authenticate }
   it { should respond_to :remember_token }
   it { should respond_to :admin }
+  it { should respond_to :microposts }
 
   it { should be_valid } 
   it { should_not be_admin }
-  
+
+  describe "micropost associations" do
+    before { @user.save}
+    let!(:older_micropost) do
+      @user.microposts.create(content:"cao")
+    end
+    let!(:newer_micropost) do
+      @user.microposts.create(content:"gde si")
+    end
+    it "should have the right microposts in the right order" do
+      @user.microposts.should == [newer_micropost,older_micropost]
+    end
+    it "should destroy associated microposts" do
+      microposts = @user.microposts
+      @user.destroy
+      microposts.each do |micr|
+        Micropost.find_by_id(micr.id).should be_nil
+      end
+    end
+    describe "status" do
+      let(:unfollowed_post) do
+        FactoryGirl.create(:users).microposts.create(content:"d")
+      end
+      its(:feed) { should include(newer_micropost) }
+      its(:feed) { should include(older_micropost) }
+      its(:feed) { should_not include(unfollowed_post) }
+    end
+  end
   describe "with admin attribute set to true" do
     before { @user.toggle!(:admin) }
     it { should be_admin}

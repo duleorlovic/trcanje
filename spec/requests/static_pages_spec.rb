@@ -3,15 +3,34 @@ require 'spec_helper'
 describe "StaticPages" do
   describe "Home page" do
 
-    it "should have the h1 'Sample App'" do
-      visit root_path
-      page.should have_selector('h1', text: 'Sample App')
-    end
-
     it "should have the title 'Home'" do
       visit root_path
-      page.should have_selector('title',
-                        text: "Home")
+      page.should have_selector('title', text: "Home")
+    end
+    describe "for signed-in users" do
+      let(:user) { Factory.create(:users) }
+      let(:m) { user.microposts.create content:"d"}
+      before do
+        user.microposts.create content:"a"
+        sign_in user
+        visit  root_path 
+      end
+      it " should render users feed" do
+        user.feed.each do |item|
+          page.should have_selector('tr',text:item.content)
+        end
+      end
+      describe "delete microposts" do
+        before do
+          sign_in user
+          visit root_path
+        end
+        it { page.should have_link('delete',href:micropost_path(user.microposts.first))}
+
+        it "should be able to delete micropost" do 
+          expect { click_link('delete') }.to change(user.microposts,:count).by(-1)
+        end
+      end
     end
   end
 

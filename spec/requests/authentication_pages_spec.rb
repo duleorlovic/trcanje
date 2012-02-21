@@ -7,6 +7,19 @@ describe "AuthenticationPages" do
     describe "for non signed users" do
       let(:user) { Factory(:users) }
 
+      describe "in the Microposts controler" do
+        describe "submitting to create action " do
+          before { post microposts_path }
+          specify { response.should redirect_to(signin_path) } 
+        end
+        describe "submitting to the destroy action" do
+          before do
+            micropost = user.microposts.create(content:"a")
+            delete micropost_path(micropost)
+          end
+          specify { response.should redirect_to(signin_path) } 
+        end
+      end
       describe "in the users controler" do
         describe "visiting user index" do
           before { visit user_path }

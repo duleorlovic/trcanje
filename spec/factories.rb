@@ -10,3 +10,8 @@ FactoryGirl.define do
   end
 end
 
+FactoryGirl.define do
+  factory :micropost do
+    content "cao svi"
+  end
+end
